@@ -1,4 +1,7 @@
 defmodule Okta.Jwk do
+  @doc """
+  Fetch an Okta JWK
+  """
   def fetch_jwk(%{"kid" => key_id}, payload) do
     with {:ok, jwks_uri} <- fetch_jwks_uri(payload),
          {:ok, jwks_response} <- HTTPoison.get(jwks_uri),

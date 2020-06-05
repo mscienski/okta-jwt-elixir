@@ -1,7 +1,5 @@
 defmodule Okta do
-  @moduledoc """
-  Documentation for `Okta`.
-  """
+  @moduledoc File.read!("#{__DIR__}/../README.md")
 
   alias Okta.{
     Jwk,
@@ -9,12 +7,36 @@ defmodule Okta do
   }
 
   @doc """
-  Hello world.
+  Verify an okta token
 
   ## Examples
 
-      iex> OktaJwtElixir.hello()
-      :world
+      iex> Okta.verify_token(my_token, %{issuer: my_issuer, audience: "api://default", client_id: my_client_id)
+      {:error, :invalid_issuer}
+
+      iex> Okta.verify_token(my_token, %{issuer: my_issuer, audience: "api://default", client_id: my_client_id)
+      {:error, :invalid_audience}
+
+      iex> Okta.verify_token(my_token, %{issuer: my_issuer, audience: "api://default", client_id: my_client_id)
+      {:error, :invalid_client_id}
+
+      iex> Okta.verify_token(my_token, %{issuer: my_issuer, audience: "api://default", client_id: my_client_id)
+      {:error, :token_expired}
+
+      iex> Okta.verify_token(my_token, %{issuer: my_issuer, audience: "api://default", client_id: my_client_id)
+      {:ok,
+        %{
+          "aud" => "api://default",
+          "cid" => "1eweiinp0aQLt4Fp23f1",
+          "exp" => 1591311101,
+          "iat" => 1591310501,
+          "iss" => "https://my-org.okta.com/oauth2/my-auth-server-id",
+          "jti" => "KF.ppOT_4aabQo1vbpP0AjKbMMViuc6qm2poBeBgkEpVK7.LKeur3ma2irtu+JFHsnQsFs2OflqqEMFGXbjwt6251A=",
+          "scp" => ["profile", "offline_access", "openid", "email"],
+          "sub" => "me@test.com",
+          "uid" => "12iuyanbvW1kiaRTM9r1",
+          "ver" => 1
+        }}
 
   """
   def verify_token(token, expected_claims) do
@@ -36,7 +58,7 @@ defmodule Okta do
        ) do
     cond do
       # expected issuer is the base issuer url, issuer in the token claims contains the oauth path
-      !String.contains?(issuer, expected_issuer) ->
+      issuer != expected_issuer ->
         {:error, :invalid_issuer}
 
       audience != expected_audience ->
